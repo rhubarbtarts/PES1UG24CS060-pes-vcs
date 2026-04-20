@@ -129,9 +129,43 @@ int tree_serialize(const Tree *tree, void **data_out, size_t *len_out) {
 //   - object_write    : save that binary buffer to the store as OBJ_TREE
 //
 // Returns 0 on success, -1 on error.
-int tree_from_index(ObjectID *id_out) {
-    // TODO: Implement recursive tree building
-    // (See Lab Appendix for logical steps)
-    (void)id_out;
-    return -1;
+int tree_from_index(Index *index, ObjectID *tree_id) {
+    if (!index || index->count == 0) return -1;
+
+    // buffer to build tree content
+    size_t capacity = 1024;
+    size_t size = 0;
+    char *buffer = malloc(capacity);
+    if (!buffer) return -1;
+
+    for (size_t i = 0; i < index->count; i++) {
+        IndexEntry *e = &index->entries[i];
+
+        // ⚠️ skip nested paths for now (we'll fix later)
+        if (strchr(e->path, '/')) continue;
+
+        char hash_hex[HASH_HEX_SIZE + 1];
+        hash_to_hex(&e->id, hash_hex);
+
+        char line[512];
+        int len = snprintf(line, sizeof(line),
+                           "%06o blob %s %s\n",
+                           e->mode, hash_hex, e->path);
+
+        if (size + len >= capacity) {
+            capacity *= 2;
+            buffer = realloc(buffer, capacity);
+            if (!buffer) return -1;
+        }
+
+        memcpy(buffer + size, line, len);
+        size += len;
+    }
+
+    // write tree object
+    int rc = object_write(OBJ_TREE, buffer, size, tree_id);
+
+    free(buffer);
+    return rc;
 }
+
