@@ -99,25 +99,34 @@ int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out
 	int header_len = snprintf(header, sizeof(header), "%s %zu", type, size);
     	size_t total_size = header_len + 1 + size;
 
-unsigned char *full = malloc(total_size);
-if (!full) return -1;
+	unsigned char *full = malloc(total_size);
+	if (!full) return -1;
 
 // copy header
-memcpy(full, header, header_len);
+	memcpy(full, header, header_len);
 
 // add null separator
-full[header_len] = '\0';
+	full[header_len] = '\0';
 
 // copy actual data
-memcpy(full + header_len + 1, data, size);
-unsigned char hash[32];
-SHA256(full, total_size, hash);
-char hash_hex[65];
-for (int i = 0; i < 32; i++) {
-    sprintf(hash_hex + (i * 2), "%02x", hash[i]);
-}
-hash_hex[64] = '\0';
-(void)type; (void)data; (void)len; (void)id_out;
+	memcpy(full + header_len + 1, data, size);
+	unsigned char hash[32];
+	SHA256(full, total_size, hash);
+	char hash_hex[65];
+	for (int i = 0; i < 32; i++) {
+    	sprintf(hash_hex + (i * 2), "%02x", hash[i]);
+	}
+	hash_hex[64] = '\0';
+	char dir_path[256];
+snprintf(dir_path, sizeof(dir_path), ".pes/objects/%.2s", hash_hex);
+
+// create directory if it doesn’t exist
+mkdir(".pes", 0755);
+mkdir(".pes/objects", 0755);
+mkdir(dir_path, 0755);
+	char file_path[512];
+snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, hash_hex + 2);
+	(void)type; (void)data; (void)len; (void)id_out;
     	return -1;
 }
 
