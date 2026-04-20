@@ -95,8 +95,31 @@ int tree_serialize(const Tree *tree, void **data_out, size_t *len_out) {
 // This is enough to pass initial tests
 
 int tree_from_index(ObjectID *id_out) {
+    Index index;
 
-	(void)id_out;
-	return 0;
+    if (index_load(&index) != 0)
+        return -1;
+
+    Tree tree = {0};
+
+    for (int i = 0; i < index.count; i++) {
+        IndexEntry *e = &index.entries[i];
+
+        TreeEntry *te = &tree.entries[tree.count++];
+        te->mode = e->mode;
+        strcpy(te->name, e->path);
+        te->hash = e->hash;
+    }
+
+    void *data;
+    size_t len;
+
+    if (tree_serialize(&tree, &data, &len) != 0)
+        return -1;
+
+    int rc = object_write(OBJ_TREE, data, len, id_out);
+    free(data);
+
+    return rc;
 }
 

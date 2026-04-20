@@ -219,7 +219,7 @@ int commit_create(const char *message, ObjectID *commit_id) {
     }
 
     strncpy(commit.author, author, sizeof(commit.author) - 1);
-    strncpy(commit.committer, author, sizeof(commit.committer) - 1);
+    strncpy(commit.author, author, sizeof(commit.author) - 1);
     strncpy(commit.message, message, sizeof(commit.message) - 1);
 
     commit.timestamp = time(NULL);
