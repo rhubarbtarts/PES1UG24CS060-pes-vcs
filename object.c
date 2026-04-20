@@ -110,6 +110,13 @@ full[header_len] = '\0';
 
 // copy actual data
 memcpy(full + header_len + 1, data, size);
+unsigned char hash[32];
+SHA256(full, total_size, hash);
+char hash_hex[65];
+for (int i = 0; i < 32; i++) {
+    sprintf(hash_hex + (i * 2), "%02x", hash[i]);
+}
+hash_hex[64] = '\0';
 (void)type; (void)data; (void)len; (void)id_out;
     	return -1;
 }
