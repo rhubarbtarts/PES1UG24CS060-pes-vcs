@@ -95,6 +95,8 @@ int object_exists(const ObjectID *id) {
 // Returns 0 on success, -1 on error.
 int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out) {
     // TODO: Implement
+char header[64];
+int header_len = snprintf(header, sizeof(header), "%s %zu", type, size);
     (void)type; (void)data; (void)len; (void)id_out;
     return -1;
 }
