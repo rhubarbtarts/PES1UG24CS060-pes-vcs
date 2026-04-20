@@ -126,6 +126,17 @@ mkdir(".pes/objects", 0755);
 mkdir(dir_path, 0755);
 	char file_path[512];
 snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, hash_hex + 2);
+char temp_path[512];
+snprintf(temp_path, sizeof(temp_path), "%s.tmp", file_path);
+FILE *fp = fopen(temp_path, "wb");
+if (!fp) {
+    free(full);
+    return -1;
+}
+fwrite(full, 1, total_size, fp);
+fclose(fp);
+rename(temp_path, file_path);
+free(full);
 	(void)type; (void)data; (void)len; (void)id_out;
     	return -1;
 }
